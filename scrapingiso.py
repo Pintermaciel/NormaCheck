@@ -49,10 +49,10 @@ def acha_titulos():
             
     return titulos
 
-
 titulos = acha_titulos()
-titulos.to_csv("iso.csv")
-df = pd.read_csv("iso.csv")
+print(titulos)
+
+df = pd.DataFrame.from_dict(titulos, orient='index').reset_index().rename(columns={'index': 'chave', 0: 'descricao'})
 df = df.explode('chave')
 df = df.fillna('')
 df[['ISO', 'VERSAO']] = df['chave'].str.split(':', expand=True)
@@ -63,4 +63,4 @@ df['IDIOMA'] = df['IDIOMA'].str.split(')', n=1).str.get(0)
 df = df.drop('chave', axis=1)
 df = df.drop('colunaex', axis=1)
 df
-df.to_csv("iso.csv", sep=";", index=False)
+df.to_csv('iso.csv', index=False, sep=";")
