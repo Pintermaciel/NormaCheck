@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import pandas as pd 
+import time
 
 options = Options()
 options.add_argument('--headless')
@@ -29,6 +30,7 @@ wait.until(EC.presence_of_element_located((By.CLASS_NAME, "v-label-std-title")))
 def acha_titulos():
     titulos = {}
     while True:
+        time.sleep(60)
         wait.until(EC.presence_of_element_located((By.CLASS_NAME, "v-label-std-title")))
         std_refs = navegador.find_elements(By.CLASS_NAME, "v-label-std-ref")
         std_titles = navegador.find_elements(By.CLASS_NAME, "v-label-std-title")
@@ -63,4 +65,4 @@ df['IDIOMA'] = df['IDIOMA'].str.split(')', n=1).str.get(0)
 df = df.drop('chave', axis=1)
 df = df.drop('colunaex', axis=1)
 df
-df.to_csv('iso.csv', index=False, sep=";")
+df.to_csv('iso_standards.csv', index=False, sep=";")
