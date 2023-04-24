@@ -7,11 +7,11 @@ from selenium.webdriver.chrome.options import Options
 import pandas as pd 
 import time
 
-options = Options()
+'''options = Options()
 options.add_argument('--headless')
-options.add_argument('--disable-gpu')
+options.add_argument('--disable-gpu')'''
 
-navegador = webdriver.Chrome(options=options)
+navegador = webdriver.Chrome()      #options=options
 navegador.get('https://www.iso.org/obp/ui/en/')
 wait = WebDriverWait(navegador, 10)
 
@@ -23,31 +23,45 @@ standards_input.click()
 search_box = navegador.find_element(By.XPATH, '//*[@id="obpui-105541713"]/div/div[2]/div/div/div[2]/div/div/div[2]/div/div/div/div/div/div[2]/div/div[2]/div/div[2]/div/div/div[2]/input')
 search_box.send_keys('')
 search_box.send_keys(Keys.RETURN)
-wait
+time.sleep(60)
 
 wait.until(EC.presence_of_element_located((By.CLASS_NAME, "v-label-std-title")))
 
 def acha_titulos():
     titulos = {}
+    page_count = 0
+    count = 0
     while True:
-        time.sleep(60)
+        print('inicio do loop')
         wait.until(EC.presence_of_element_located((By.CLASS_NAME, "v-label-std-title")))
+        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "v-label-std-ref")))
+        print('aguardando pagina')
+        time.sleep(30)
         std_refs = navegador.find_elements(By.CLASS_NAME, "v-label-std-ref")
         std_titles = navegador.find_elements(By.CLASS_NAME, "v-label-std-title")
-        for i in range(len(std_refs)):
-            titulo = std_titles[i].text
-            ref = std_refs[i].text
-            titulos[ref] = titulo
-        
+        refs = [ref.text for ref in std_refs]
+        titles = [title.text for title in std_titles]
+        for i in range(len(refs)):
+            titulos[refs[i]] = titles[i]
+            count += 1
+        if count % 300 == 0:
+            page_count += 1
+            print(f"Collected {count} titles from {page_count} pages")
+                
         try:
-            wait.until(EC.presence_of_element_located((By.CLASS_NAME, "v-label-std-title")))
+            if page_count % 3 == 0:
+                print("Espera 10 seguntos antes de continuar ...")
+                time.sleep(10)
             next_button = navegador.find_element(By.XPATH, "//div[@class='v-button v-widget i-paging v-button-i-paging last v-button-last']")
             if next_button.get_attribute("class") == "v-button v-widget i-paging v-button-i-paging last v-button-last v-disabled":
                 break
             next_button.click()
-            wait.until(EC.staleness_of(std_refs[-1]))
+            print("Proxima Página")
+            time.sleep(5)
         except:
-            break
+            print("Excessão, verificar codigo")
+            time.sleep(2)
+            pass
             
     return titulos
 
@@ -65,4 +79,4 @@ df['IDIOMA'] = df['IDIOMA'].str.split(')', n=1).str.get(0)
 df = df.drop('chave', axis=1)
 df = df.drop('colunaex', axis=1)
 df
-df.to_csv('iso_standards.csv', index=False, sep=";")
+df.to_csv('iso.csv', index=False, sep=";")  
