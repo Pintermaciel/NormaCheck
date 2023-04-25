@@ -46,7 +46,7 @@ def acha_titulos():
             time.sleep(2)
             continue
         print('aguardando pagina')
-
+        
         for i in range(3): # tenta encontrar os títulos até 3 vezes
             std_refs = navegador.find_elements(By.CLASS_NAME, "v-label-std-ref")
             std_titles = navegador.find_elements(By.CLASS_NAME, "v-label-std-title")
@@ -54,7 +54,7 @@ def acha_titulos():
                 break
             else:
                 time.sleep(1) # espera 1 segundo antes de tentar novamente
-                
+            
         refs = [ref.text for ref in std_refs]
         titles = [title.text for title in std_titles]
         for i in range(len(refs)):
@@ -81,7 +81,8 @@ def acha_titulos():
                 for row in df.itertuples(index=False, name=None):
                     writer.writerow(row)
                 print(f"Saved {filename}")
-                        
+                
+                
         try:
             if page_count % 3 == 0:
                 print("Espera 10 seguntos antes de continuar ...")
