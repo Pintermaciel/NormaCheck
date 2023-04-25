@@ -32,24 +32,37 @@ def acha_titulos():
     titulos = {}
     page_count = 0
     count = 0
+    
     while True:
         print('inicio do loop')
-        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "v-label-std-title")))
-        wait.until(EC.presence_of_element_located((By.CLASS_NAME, "v-label-std-ref")))
+        try:
+            wait = WebDriverWait(navegador, 30)
+            wait.until(EC.presence_of_element_located((By.CLASS_NAME, "v-label-std-title")))
+            wait.until(EC.presence_of_element_located((By.CLASS_NAME, "v-label-std-ref")))
+        except:
+            print("Exceção, verificar código")
+            time.sleep(2)
+            continue
         print('aguardando pagina')
-        time.sleep(30)
-        std_refs = navegador.find_elements(By.CLASS_NAME, "v-label-std-ref")
-        std_titles = navegador.find_elements(By.CLASS_NAME, "v-label-std-title")
+
+        for i in range(3): # tenta encontrar os títulos até 3 vezes
+            std_refs = navegador.find_elements(By.CLASS_NAME, "v-label-std-ref")
+            std_titles = navegador.find_elements(By.CLASS_NAME, "v-label-std-title")
+            if std_refs: # se os títulos forem encontrados, interrompe o loop
+                break
+            else:
+                time.sleep(1) # espera 1 segundo antes de tentar novamente
+                
         refs = [ref.text for ref in std_refs]
         titles = [title.text for title in std_titles]
         for i in range(len(refs)):
             titulos[refs[i]] = titles[i]
             count += 1
-        if count % 300 == 0:
+        if count % 10 == 0:
             page_count += 1
             print(f"Collected {count} titles from {page_count} pages")
         if page_count % 5 == 0:
-            filename = f"{count}_page_count{page_count}_pages.csv"
+            filename = f"{count}_stardards{page_count}_pages.csv"
             with open(filename, mode='w', newline='', encoding='utf-8') as csvfile:
                 writer = csv.writer(csvfile)
                 df = pd.DataFrame.from_dict(titulos, orient='index').reset_index().rename(columns={'index': 'chave', 0: 'descricao'})
