@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+import csv
 import pandas as pd 
 import time
 
@@ -47,7 +48,25 @@ def acha_titulos():
         if count % 300 == 0:
             page_count += 1
             print(f"Collected {count} titles from {page_count} pages")
-                
+        if page_count % 5 == 0:
+            filename = f"{count}_page_count{page_count}_pages.csv"
+            with open(filename, mode='w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                df = pd.DataFrame.from_dict(titulos, orient='index').reset_index().rename(columns={'index': 'chave', 0: 'descricao'})
+                df = df.explode('chave')
+                df = df.fillna('')
+                df[['ISO', 'VERSAO']] = df['chave'].str.split(':', expand=True)
+                df[['colunaex','IDIOMA']] = df['chave'].str.split('(', expand=True)
+                df['ISO'] = df['ISO'].str.split('(', n=1).str.get(0)
+                df['VERSAO'] = df['VERSAO'].str.split('(', n=1).str.get(0)
+                df['IDIOMA'] = df['IDIOMA'].str.split(')', n=1).str.get(0)
+                df = df.drop('chave', axis=1)
+                df = df.drop('colunaex', axis=1)
+                writer.writerow(['ISO', 'VERSAO', 'IDIOMA', 'descricao'])
+                for row in df.itertuples(index=False, name=None):
+                    writer.writerow(row)
+                print(f"Saved {filename}")
+                        
         try:
             if page_count % 3 == 0:
                 print("Espera 10 seguntos antes de continuar ...")
@@ -68,15 +87,3 @@ def acha_titulos():
 titulos = acha_titulos()
 print(titulos)
 
-df = pd.DataFrame.from_dict(titulos, orient='index').reset_index().rename(columns={'index': 'chave', 0: 'descricao'})
-df = df.explode('chave')
-df = df.fillna('')
-df[['ISO', 'VERSAO']] = df['chave'].str.split(':', expand=True)
-df[['colunaex','IDIOMA']] = df['chave'].str.split('(', expand=True)
-df['ISO'] = df['ISO'].str.split('(', n=1).str.get(0)
-df['VERSAO'] = df['VERSAO'].str.split('(', n=1).str.get(0)
-df['IDIOMA'] = df['IDIOMA'].str.split(')', n=1).str.get(0)
-df = df.drop('chave', axis=1)
-df = df.drop('colunaex', axis=1)
-df
-df.to_csv('iso.csv', index=False, sep=";")  
