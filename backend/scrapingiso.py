@@ -3,6 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.chrome.options import Options
 import csv
 import pandas as pd 
@@ -36,9 +37,10 @@ def acha_titulos():
     while True:
         print('inicio do loop')
         try:
+            time.sleep(30)
             wait = WebDriverWait(navegador, 30)
-            wait.until(EC.presence_of_element_located((By.CLASS_NAME, "v-label-std-title")))
-            wait.until(EC.presence_of_element_located((By.CLASS_NAME, "v-label-std-ref")))
+            wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "v-label-std-title")))
+            wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "v-label-std-ref")))
         except:
             print("Exceção, verificar código")
             time.sleep(2)
@@ -90,6 +92,11 @@ def acha_titulos():
             next_button.click()
             print("Proxima Página")
             time.sleep(5)
+            
+        except StaleElementReferenceException:
+            print("Elemento não encontrado, aguardando 1 segundo...")
+            time.sleep(1)
+            continue
         except:
             print("Excessão, verificar codigo")
             time.sleep(2)
